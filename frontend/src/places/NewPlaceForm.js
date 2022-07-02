@@ -1,100 +1,76 @@
-import { useState } from "react"
-import { useHistory } from "react-router"
+import { useContext, useState } from 'react'
+import { CurrentUser } from '../contexts/CurrentUser'
 
-function NewPlaceForm() {
+function NewCommentForm({ place, onSubmit }) {
+  const { currentUser } = useContext(CurrentUser)
 
-	const history = useHistory()
+  const [comment, setComment] = useState({
+    content: '',
+    stars: 3,
+    rant: false,
+  })
 
-	const [place, setPlace] = useState({
-		name: '',
-		pic: '',
-		city: '',
-		state: '',
-		cuisines: ''
-	})
+  function handleSubmit(e) {
+    e.preventDefault()
+    onSubmit(comment)
+    setComment({
+      content: '',
+      stars: 3,
+      rant: false,
+    })
+  }
 
-	async function handleSubmit(e) {
-		e.preventDefault()
+  if (!currentUser) {
+    return <p>You must be logged in to leave a rant or rave.</p>
+  }
 
-		await fetch(`http://localhost:5000/places`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(place)
-		})
-
-		history.push('/places')
-	}
-
-	return (
-		<main>
-			<h1>Add a New Place</h1>
-			<form onSubmit={handleSubmit}>
-				<div className="form-group">
-					<label htmlFor="name">Place Name</label>
-					<input
-						required
-						value={place.name}
-						onChange={e => setPlace({ ...place, name: e.target.value })}
-						className="form-control"
-						id="name"
-						name="name"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="founded">Year Founded</label>
-					<input
-						required
-						value={place.founded}
-						onChange={e => setPlace({ ...place, founded: e.target.value })}
-						className="form-control"
-						id="founded"
-						name="founded"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="pic">Place Picture</label>
-					<input
-						value={place.pic}
-						onChange={e => setPlace({ ...place, pic: e.target.value })}
-						className="form-control"
-						id="pic"
-						name="pic"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="city">City</label>
-					<input
-						value={place.city}
-						onChange={e => setPlace({ ...place, city: e.target.value })}
-						className="form-control"
-						id="city"
-						name="city"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="state">State</label>
-					<input
-						value={place.state}
-						onChange={e => setPlace({ ...place, state: e.target.value })}
-						className="form-control"
-						id="state"
-						name="state"
-					/>
-				</div>
-				<div className="form-group">
-					<label htmlFor="cuisines">Cuisines</label>
-					<input
-						value={place.cuisines}
-						onChange={e => setPlace({ ...place, cuisines: e.target.value })}
-						className="form-control"
-						id="cuisines" name="cuisines" required />
-				</div>
-				<input className="btn btn-primary" type="submit" value="Add Place" />
-			</form>
-		</main>
-	)
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="row">
+        <div className="form-group col-sm-12">
+          <label htmlFor="content">Content</label>
+          <textarea
+            required
+            value={comment.content}
+            onChange={(e) =>
+              setComment({ ...comment, content: e.target.value })
+            }
+            className="form-control"
+            id="content"
+            name="content"
+          />
+        </div>
+      </div>
+      <div className="row">
+        <div className="form-group col-sm-4">
+          <label htmlFor="stars">Star Rating</label>
+          <input
+            value={comment.stars}
+            onChange={(e) => setComment({ ...comment, stars: e.target.value })}
+            type="range"
+            step="0.5"
+            min="1"
+            max="5"
+            id="stars"
+            name="stars"
+            className="form-control"
+          />
+        </div>
+        <div className="form-group col-sm-4">
+          <label htmlFor="rand">Rant</label>
+          <input
+            checked={place.rant}
+            onClick={(e) => setComment({ ...comment, rant: e.target.checked })}
+            type="checkbox"
+            id="rant"
+            name="rant"
+            className="form-control"
+          />
+        </div>
+      </div>
+      <input className="btn btn-primary" type="submit" value="Add Comment" />
+    </form>
+  )
 }
 
-export default NewPlaceForm
+export default NewCommentForm
